@@ -1,0 +1,14 @@
+wymagania przed: globalnie zainstalowany typescript (aby działało polecenie tsc), zainstalowany npm
+
+wpisujemy tsc --init aby zainicjować projekt typescript
+wpisujemy npm init aby zainicjować projekt nodejs, odpowiadamy na pytanka
+
+instalujemy typescript w projekcie: npm install typescript --save-dev
+instalujemy parcel bundler: npm install parcel-bundler --save-dev
+
+konfigurujemy polecenie start: parcel index.html w package.json
+
+konfigurujemy tsconfing.json: 
+
+tworzymy plik index.html z następującą zawartością: <index.html>
+tworzymy plik app.ts z następującą zawartością: 
