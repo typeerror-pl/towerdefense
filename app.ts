@@ -22,15 +22,18 @@ const makeMainLoop = (ctx: CanvasRenderingContext2D) => {
         lastTime = currentTime;
 
         // przeliczenia logiki gry
-        circle.radius += 20 * delta;
+        circle.radius += 10 * delta;
 
         // rysowanie gry
         ctx.save();
         ctx.fillStyle = 'red';
 
-        ctx.beginPath();
-        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
-        ctx.fill();
+        points.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, circle.radius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
         ctx.restore();
 
         // ponowne wywołanie aktualizacji stanu
@@ -49,3 +52,22 @@ if (context !== null) {
 
 // dodanie płótna do elementu body
 document.body.appendChild(canvas);
+
+// obsługa zdarzeń
+type Coords = 
+{
+    x: number;
+    y: number;
+}
+
+const points: Coords[] = [];
+
+const onMouseClick = (e: MouseEvent) => {
+    const mouseCoords = getMouseCoords(e);
+
+    points.push(mouseCoords);
+};
+
+const getMouseCoords = (e: MouseEvent): Coords => ({ x: e.pageX, y: e.pageY });
+
+canvas.addEventListener('mousedown', onMouseClick);
