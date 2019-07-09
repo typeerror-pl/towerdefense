@@ -5,22 +5,46 @@ const context = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// rysowanie po kontekście płótna
-function draw(ctx: CanvasRenderingContext2D): void {
+const circle = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+    radius: 1,
+};
 
-    ctx.fillStyle = 'red';
-    ctx.fillRect(100, 100, 100, 100);
+// aktualizacja oraz rysowanie stanu gry
+let lastTime = performance.now();
 
-    ctx.fillStyle = 'green';
-    ctx.fillRect(300, 100, 100, 100);
+const makeMainLoop = (ctx: CanvasRenderingContext2D) => {
+    const frame = (currentTime: number) => {
 
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(500, 100, 100, 100);
+        // obliczenie delty pomiędzy dwoma klatkami
+        const delta = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
 
-}
+        // przeliczenia logiki gry
+        circle.radius += 20 * delta;
+
+        // rysowanie gry
+        ctx.save();
+        ctx.fillStyle = 'red';
+
+        ctx.beginPath();
+        ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // ponowne wywołanie aktualizacji stanu
+        requestAnimationFrame(frame);
+
+    };
+    
+    return frame;
+};
 
 if (context !== null) {
-    draw(context);
+    const update = makeMainLoop(context);
+
+    requestAnimationFrame(update);
 }
 
 // dodanie płótna do elementu body
