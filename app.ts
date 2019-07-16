@@ -96,9 +96,6 @@ const makeMainLoop = (ctx: CanvasRenderingContext2D, gameState: GameState, level
         const delta = (currentTime - lastTime) / 1000;
         lastTime = currentTime;
 
-        // aktualizacja stanu gry
-        updateEnemies(gameState, delta);
-
         // odrysowanie stanu gry
         redrawGameState(gameState, level, ctx);
 
@@ -157,9 +154,6 @@ const redrawGameState = (gameState: GameState, level: Level, ctx: CanvasRenderin
     // wieżyczki
     gameState.towers.forEach(tower => drawCircle(ctx, tower, 'lightblue'));
 
-    // przeciwnicy
-    gameState.enemies.forEach(enemy => drawCircle(ctx, enemy, 'red'));
-
     // new tower overlay
     drawTowerOverlay(ctx, gameState, mouse);
 
@@ -197,12 +191,6 @@ const distanceBetween = (p1: Coords, p2: Coords): number => {
     return Math.sqrt(delta.x * delta.x + delta.y * delta.y);
 }
 
-// const isInTowerRange = (tower: Tower, enemy: Enemy): boolean => {
-//     const distance = distanceBetween(tower, enemy);
-
-//     return distance < tower.range;
-// }
-
 const canPlaceTower = (gameState: GameState, newTower: Tower): boolean => {
     if (gameState.cash < newTower.cost) {
         return false;
@@ -211,7 +199,7 @@ const canPlaceTower = (gameState: GameState, newTower: Tower): boolean => {
     const isPlaceOccupied = gameState.towers.some(otherTower => {
         const distance = distanceBetween(newTower, otherTower);
 
-        return distance < (newTower.radius + otherTower.radius + 32);
+        return distance < (newTower.radius + otherTower.radius);
     });
 
     return !isPlaceOccupied;
@@ -225,30 +213,6 @@ const placeTower = (gameState: GameState, newTower: Tower): void => {
     gameState.cash -= newTower.cost;
     gameState.towers.push(newTower);
 }
-
-const spawnEnemy = (gameState: GameState, level: Level, newEnemy: Enemy): void => {
-    newEnemy.y = Math.random() * level.height;
-    newEnemy.vx = 1.0;
-
-    gameState.enemies.push(newEnemy);
-}
-
-const updateEnemies = (gameState: GameState, delta: number): void => {
-    gameState.enemies.forEach(enemy => {
-        const force = f(enemy, [...gameState.towers, ...gameState.enemies.filter(e => e != enemy)]);
-
-        const dir: Coords = 
-        {
-            x: enemy.vx + force.x,
-            y: enemy.vy + force.y,
-        };
-
-        const normalized = normalize(dir);
-
-        enemy.x += normalized.x * enemy.speed * delta;
-        enemy.y += normalized.y * enemy.speed * delta;
-    });
-};
 
 const provideBasicTower = (): Tower => {
     const basicTower: Tower = 
@@ -265,64 +229,4 @@ const provideBasicTower = (): Tower => {
     return basicTower;
 };
 
-const provideBasicEnemy = (): Enemy => {
-    const basicEnemy: Enemy =
-    {
-        hitPoints: 5,
-        reward: 10,
-        radius: 16,
-        speed: 50,
-        vx: 0,
-        vy: 0,
-        x: 0,
-        y: 0,
-    };
-
-    return basicEnemy;
-};
-
 const provideGameStateText = (gameState: GameState): string => `HitPoints: ${gameState.hitPoints}, Cash: ${gameState.cash}`;
-
-
-setInterval(() => {
-    const newEnemy = provideBasicEnemy();
-    spawnEnemy(gameState, level, newEnemy);
-}, 1000)
-
-
-
-
-
-
-
-const normalize = (v: Coords) => {
-    const len = Math.sqrt(v.x * v.x + v.y * v.y);
-
-    return { x: v.x / len, y: v.y / len };
-};
-
-const getForce = (to: Enemy, from: Entity): Coords => {
-    const dist = (distanceBetween(from, to)) - to.radius;
-    const mass = from.radius * from.radius;
-
-    const magnitude = mass / (dist * dist);
-    const dir = normalize({ x: to.x - from.x, y: to.y - from.y });
-
-    dir.x *= magnitude;
-    dir.y *= magnitude;
-
-    return dir;
-};
-
-const f = (enemy: Enemy, obstacles: Entity[]) => {
-    const v = { x: 0, y: 0 };
-
-    obstacles.forEach(obstacle => {
-        const force = getForce(enemy, obstacle);
-
-        v.x += force.x;
-        v.y += force.y;
-    });
-
-    return v;
-};
